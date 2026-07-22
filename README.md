@@ -46,7 +46,7 @@ Shell registry entry:
 {
   appCode: "elog",
   name: "eLog",
-  entry: "https://micro-elog.pages.dev/qiankun-entry.html",
+  entry: "https://micro-elog.pages.dev/qiankun-entry",
   activeRule: "/apps/elog",
   container: "#subapp-container",
   status: "ACTIVE",
@@ -54,9 +54,9 @@ Shell registry entry:
 }
 ```
 
-Use the dedicated Qiankun entry, not the Next homepage HTML. `public/qiankun-entry.html` is intentionally tiny so Qiankun/import-html-entry only evaluates the lifecycle adapter instead of the standalone Next/Turbopack document runtime.
+Use the dedicated Qiankun entry, not the Next homepage HTML. `out/qiankun-entry.html` is generated during `pnpm build` so Qiankun/import-html-entry only evaluates the real mini-app lifecycle bundle instead of the standalone Next/Turbopack document runtime. Cloudflare serves the clean `/qiankun-entry` URL through `_redirects`.
 
-Lifecycle globals are exposed by `public/qiankun-lifecycle.js`:
+Lifecycle globals are exposed by `out/qiankun-lifecycle.js`:
 
 ```ts
 bootstrap(props)
@@ -84,7 +84,7 @@ When mounted with `window.__POWERED_BY_QIANKUN__` or `layoutContext.sidebarMode 
 
 Standalone routes remain available at `/bookings`, `/shipments`, and the other module paths. Host mirror routes are statically exported under `/apps/elog/...` for Qiankun.
 
-The Qiankun lifecycle mounts the eLog UI into the shell-provided container by creating an isolated frame pointed at the matching `/apps/elog/...` route on the eLog deployment origin. This keeps Next runtime assets/chunks loading from `https://micro-elog.pages.dev/` and keeps launch tokens out of URLs.
+The Qiankun lifecycle renders the real eLog React UI into `props.container` and cleans up the React root on unmount. It does not render through an iframe. Standalone Next routes still serve the direct eLog app at `/` and module paths.
 
 If Cloudflare serves assets from a custom CDN/origin, set `NEXT_PUBLIC_ASSET_PREFIX` during build so `/_next` chunks resolve from that origin. Do not pass tokens through URLs; the shell should pass `token` through Qiankun props.
 
