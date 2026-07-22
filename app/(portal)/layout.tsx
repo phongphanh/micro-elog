@@ -1,0 +1,11 @@
+import { Suspense } from "react"
+
+import { PortalShell } from "@/components/portal/portal-shell"
+
+export default function PortalLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<div className="min-h-svh bg-background p-6 text-sm text-muted-foreground">Loading eLog...</div>}>
+      <PortalShell>{children}</PortalShell>
+    </Suspense>
+  )
+}
