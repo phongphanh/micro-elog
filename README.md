@@ -46,13 +46,15 @@ Shell registry entry:
 {
   appCode: "elog",
   name: "eLog",
-  entry: "<elog deployment url>",
+  entry: "https://micro-elog.pages.dev/qiankun-entry.html",
   activeRule: "/apps/elog",
   container: "#subapp-container",
   status: "ACTIVE",
   authMode: "SSO_CONTEXT"
 }
 ```
+
+Use the dedicated Qiankun entry, not the Next homepage HTML. `public/qiankun-entry.html` is intentionally tiny so Qiankun/import-html-entry only evaluates the lifecycle adapter instead of the standalone Next/Turbopack document runtime.
 
 Lifecycle globals are exposed by `public/qiankun-lifecycle.js`:
 
@@ -81,6 +83,8 @@ type ShellBridge = {
 When mounted with `window.__POWERED_BY_QIANKUN__` or `layoutContext.sidebarMode === "host-rendered"`, eLog hides its internal sidebar/header and registers shell-owned nav items with paths like `/apps/elog/bookings`.
 
 Standalone routes remain available at `/bookings`, `/shipments`, and the other module paths. Host mirror routes are statically exported under `/apps/elog/...` for Qiankun.
+
+The Qiankun lifecycle mounts the eLog UI into the shell-provided container by creating an isolated frame pointed at the matching `/apps/elog/...` route on the eLog deployment origin. This keeps Next runtime assets/chunks loading from `https://micro-elog.pages.dev/` and keeps launch tokens out of URLs.
 
 If Cloudflare serves assets from a custom CDN/origin, set `NEXT_PUBLIC_ASSET_PREFIX` during build so `/_next` chunks resolve from that origin. Do not pass tokens through URLs; the shell should pass `token` through Qiankun props.
 

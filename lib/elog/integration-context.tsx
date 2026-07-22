@@ -50,7 +50,10 @@ export function useGlobalIntegrationContext() {
   const [context, setContext] = React.useState<ShellIntegrationContext>(() => getWindowIntegrationContext())
 
   React.useEffect(() => {
+    persistQiankunModeFromLocation()
+
     function syncContext() {
+      persistQiankunModeFromLocation()
       setContext(getWindowIntegrationContext())
     }
 
@@ -72,6 +75,7 @@ export function isHostRenderedNavigation(context: ShellIntegrationContext) {
 
   return (
     Boolean(window.__POWERED_BY_QIANKUN__) ||
+    hasQiankunModeFlag() ||
     context.layoutContext?.sidebarMode === "host-rendered" ||
     context.layoutContext?.navigationOwner === "shell"
   )
@@ -103,4 +107,25 @@ function getWindowIntegrationContext() {
   }
 
   return window.__ELOG_INTEGRATION_CONTEXT__ ?? {}
+}
+
+function persistQiankunModeFromLocation() {
+  if (typeof window === "undefined") {
+    return
+  }
+
+  if (new URLSearchParams(window.location.search).get("__qiankun") === "1") {
+    window.sessionStorage.setItem("elog:qiankun-mode", "1")
+  }
+}
+
+function hasQiankunModeFlag() {
+  try {
+    return (
+      new URLSearchParams(window.location.search).get("__qiankun") === "1" ||
+      window.sessionStorage.getItem("elog:qiankun-mode") === "1"
+    )
+  } catch {
+    return false
+  }
 }

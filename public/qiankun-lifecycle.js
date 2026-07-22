@@ -1,5 +1,8 @@
 (function () {
   var ELOG_APP_CODE = "elog";
+  var ELOG_DEFAULT_PUBLIC_ORIGIN = "https://micro-elog.pages.dev";
+  var ELOG_HOST_BASEPATH = "/apps/elog";
+  var ELOG_FRAME_ID = "elog-qiankun-frame";
   var ELOG_NAV_ITEMS = [
     { key: "elog-dashboard", label: "Dashboard", path: "/apps/elog", icon: "D" },
     { key: "elog-bookings", label: "Bookings", path: "/apps/elog/bookings", icon: "B" },
@@ -40,6 +43,72 @@
     window.dispatchEvent(new CustomEvent("elog:integration-context"));
   }
 
+  function getContainerElement(container) {
+    if (!container) {
+      return document.querySelector("#subapp-container") || document.body;
+    }
+
+    if (container.nodeType === 11 && container.querySelector) {
+      return container.querySelector("#subapp-container") || container.firstElementChild || container;
+    }
+
+    return container;
+  }
+
+  function getPublicOrigin(props) {
+    if (props && props.assetBaseUrl) {
+      return String(props.assetBaseUrl).replace(/\/$/, "");
+    }
+
+    if (window.__ELOG_PUBLIC_ORIGIN__) {
+      return String(window.__ELOG_PUBLIC_ORIGIN__).replace(/\/$/, "");
+    }
+
+    if (window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__) {
+      return new URL(window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__).origin;
+    }
+
+    return ELOG_DEFAULT_PUBLIC_ORIGIN;
+  }
+
+  function getShellPath() {
+    var pathname = window.location.pathname || ELOG_HOST_BASEPATH;
+
+    if (pathname === ELOG_HOST_BASEPATH || pathname.indexOf(ELOG_HOST_BASEPATH + "/") === 0) {
+      return pathname;
+    }
+
+    return ELOG_HOST_BASEPATH;
+  }
+
+  function getFrameUrl(props) {
+    var url = new URL(getShellPath(), getPublicOrigin(props));
+
+    url.searchParams.set("__qiankun", "1");
+
+    return url.toString();
+  }
+
+  function renderFrame(props) {
+    var container = getContainerElement(props.container);
+    var frame = document.createElement("iframe");
+
+    container.innerHTML = "";
+    frame.id = ELOG_FRAME_ID;
+    frame.title = "eLog";
+    frame.src = getFrameUrl(props);
+    frame.setAttribute("data-elog-qiankun-frame", "true");
+    frame.style.width = "100%";
+    frame.style.minHeight = "calc(100vh - 220px)";
+    frame.style.height = "100%";
+    frame.style.border = "0";
+    frame.style.display = "block";
+    frame.style.background = "transparent";
+    container.appendChild(frame);
+
+    return frame;
+  }
+
   async function bootstrap() {
     console.info("[eLog] bootstrap");
   }
@@ -55,12 +124,15 @@
       props.container.setAttribute("data-elog-mounted", "true");
     }
 
+    renderFrame(props);
+
     console.info("[eLog] mounted", {
       appCode: ELOG_APP_CODE,
       correlationId: props.correlationId,
       sidebarMode: props.layoutContext && props.layoutContext.sidebarMode,
       userId: props.userContext && props.userContext.userId,
-      orgId: props.userContext && props.userContext.orgId
+      orgId: props.userContext && props.userContext.orgId,
+      frameUrl: getFrameUrl(props)
     });
   }
 
@@ -72,9 +144,7 @@
     window.__ELOG_INTEGRATION_CONTEXT__ = {};
     window.dispatchEvent(new CustomEvent("elog:integration-context"));
 
-    if (props.container) {
-      props.container.innerHTML = "";
-    }
+    getContainerElement(props.container).innerHTML = "";
 
     console.info("[eLog] unmounted");
   }

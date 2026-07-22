@@ -30,8 +30,6 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", inter.variable)}
     >
       <body>
-        {/* eslint-disable-next-line @next/next/no-sync-scripts -- Qiankun must discover lifecycle globals before app chunks execute. */}
-        <script src="/qiankun-lifecycle.js" />
         <ThemeProvider>
           {children}
           <AppToaster />
