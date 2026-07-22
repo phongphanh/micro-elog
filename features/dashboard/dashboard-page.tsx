@@ -1,6 +1,8 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { AlertTriangle, CircleDollarSign, ClipboardList, Container, Gauge, Plus, Ship, Truck } from "lucide-react"
 import {
   Area,
@@ -25,12 +27,24 @@ import { StatCard } from "@/components/shared/stat-card"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { Timeline } from "@/components/shared/timeline"
 import { Button } from "@/components/ui/button"
+import { moduleRoutes } from "@/lib/elog/constants"
 import { dashboardData } from "@/lib/elog/mock-data"
+import type { ModuleKey } from "@/lib/elog/types"
 import { cn } from "@/lib/utils"
 
 const kpiIcons = [Ship, ClipboardList, Container, Truck, CircleDollarSign, Gauge]
 
 export function DashboardPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  React.useEffect(() => {
+    const legacyModule = searchParams.get("module")
+    if (legacyModule && legacyModule in moduleRoutes) {
+      router.replace(moduleRoutes[legacyModule as ModuleKey])
+    }
+  }, [router, searchParams])
+
   return (
     <div className="space-y-5">
       <PageHeader

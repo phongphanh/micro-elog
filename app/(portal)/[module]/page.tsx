@@ -1,7 +1,15 @@
 import { notFound } from "next/navigation"
 
 import { ModulePage } from "@/features/modules/module-page"
-import { routeToModule } from "@/lib/elog/constants"
+import { moduleRoutes, routeToModule } from "@/lib/elog/constants"
+
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return Object.values(moduleRoutes)
+    .filter((route) => route !== "/")
+    .map((route) => ({ module: route.replace("/", "") }))
+}
 
 export default async function Page({ params }: { params: Promise<{ module: string }> }) {
   const { module } = await params

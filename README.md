@@ -19,6 +19,23 @@ pnpm typecheck
 pnpm build
 ```
 
+## Deploy to Cloudflare Pages
+
+This project is configured for Cloudflare Pages static hosting.
+
+Cloudflare Pages settings:
+
+```text
+Framework preset: Next.js (Static HTML Export)
+Build command: pnpm build
+Build output directory: out
+Node.js version: 20 or newer
+```
+
+`next.config.ts` uses `output: "export"`, so `pnpm build` writes the deployable static site to `out/`.
+
+For full-stack SSR Next.js on Cloudflare, use the Cloudflare Workers + OpenNext adapter instead. This eLog MVP uses mock/client data, so static Pages output is the lighter deployment path.
+
 ## Source Structure
 
 ```text
