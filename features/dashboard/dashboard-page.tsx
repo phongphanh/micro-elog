@@ -28,6 +28,7 @@ import { StatusBadge } from "@/components/shared/status-badge"
 import { Timeline } from "@/components/shared/timeline"
 import { Button } from "@/components/ui/button"
 import { moduleRoutes } from "@/lib/elog/constants"
+import { getHostPath, isHostRenderedNavigation, useElogIntegrationContext } from "@/lib/elog/integration-context"
 import { dashboardData } from "@/lib/elog/mock-data"
 import type { ModuleKey } from "@/lib/elog/types"
 import { cn } from "@/lib/utils"
@@ -37,20 +38,24 @@ const kpiIcons = [Ship, ClipboardList, Container, Truck, CircleDollarSign, Gauge
 export function DashboardPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const integrationContext = useElogIntegrationContext()
+  const hostRenderedNavigation = isHostRenderedNavigation(integrationContext)
+  const bookingCreatePath = `${hostRenderedNavigation ? getHostPath(moduleRoutes.bookings) : moduleRoutes.bookings}?view=create`
 
   React.useEffect(() => {
     const legacyModule = searchParams.get("module")
     if (legacyModule && legacyModule in moduleRoutes) {
-      router.replace(moduleRoutes[legacyModule as ModuleKey])
+      const route = moduleRoutes[legacyModule as ModuleKey]
+      router.replace(hostRenderedNavigation ? getHostPath(route) : route)
     }
-  }, [router, searchParams])
+  }, [hostRenderedNavigation, router, searchParams])
 
   return (
     <div className="space-y-5">
       <PageHeader
         title="Dashboard"
         description="Real-time operational overview across bookings, shipments, containers, truck appointments and finance."
-        action={<Button><Link className="inline-flex items-center gap-1.5" href="/bookings?view=create"><Plus className="size-4" /> New booking</Link></Button>}
+        action={<Button><Link className="inline-flex items-center gap-1.5" href={bookingCreatePath}><Plus className="size-4" /> New booking</Link></Button>}
       />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         {dashboardData.kpis.map((kpi, index) => <StatCard key={kpi.label} {...kpi} icon={kpiIcons[index] ?? Gauge} />)}

@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 
 import type { ModuleKey, StatusTone } from "@/lib/elog/types"
+import type { MiniAppNavItem } from "@/lib/elog/integration-context"
 
 export const moduleRoutes: Record<ModuleKey, string> = {
   dashboard: "/",
@@ -149,3 +150,15 @@ export const menuGroups = [
     ],
   },
 ]
+
+export const ELOG_APP_CODE = "elog"
+export const ELOG_HOST_BASEPATH = "/apps/elog"
+
+export const elogNavItems: MiniAppNavItem[] = menuGroups.flatMap((group) =>
+  group.items.map((item) => ({
+    key: `elog-${item.key}`,
+    label: item.label,
+    path: item.key === "dashboard" ? ELOG_HOST_BASEPATH : `${ELOG_HOST_BASEPATH}${moduleRoutes[item.key]}`,
+    icon: item.label.charAt(0),
+  }))
+)

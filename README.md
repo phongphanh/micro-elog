@@ -36,6 +36,54 @@ Node.js version: 20 or newer
 
 For full-stack SSR Next.js on Cloudflare, use the Cloudflare Workers + OpenNext adapter instead. This eLog MVP uses mock/client data, so static Pages output is the lighter deployment path.
 
+## Qiankun Shell Integration
+
+eLog can run standalone or as a Qiankun mini app mounted by the shell at `/apps/elog`.
+
+Shell registry entry:
+
+```ts
+{
+  appCode: "elog",
+  name: "eLog",
+  entry: "<elog deployment url>",
+  activeRule: "/apps/elog",
+  container: "#subapp-container",
+  status: "ACTIVE",
+  authMode: "SSO_CONTEXT"
+}
+```
+
+Lifecycle globals are exposed by `public/qiankun-lifecycle.js`:
+
+```ts
+bootstrap(props)
+mount(props)
+unmount(props)
+```
+
+Qiankun props follow the same contract as `todo-app`:
+
+```ts
+type MiniAppNavItem = {
+  key: string
+  label: string
+  path: string
+  icon?: string
+}
+
+type ShellBridge = {
+  setNavItems: (appCode: string, navItems: MiniAppNavItem[]) => void
+  clearNavItems: (appCode: string) => void
+}
+```
+
+When mounted with `window.__POWERED_BY_QIANKUN__` or `layoutContext.sidebarMode === "host-rendered"`, eLog hides its internal sidebar/header and registers shell-owned nav items with paths like `/apps/elog/bookings`.
+
+Standalone routes remain available at `/bookings`, `/shipments`, and the other module paths. Host mirror routes are statically exported under `/apps/elog/...` for Qiankun.
+
+If Cloudflare serves assets from a custom CDN/origin, set `NEXT_PUBLIC_ASSET_PREFIX` during build so `/_next` chunks resolve from that origin. Do not pass tokens through URLs; the shell should pass `token` through Qiankun props.
+
 ## Source Structure
 
 ```text

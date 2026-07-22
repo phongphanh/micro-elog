@@ -13,6 +13,7 @@ import { DataTable } from "@/features/modules/data-table"
 import { DetailPage } from "@/features/modules/detail-page"
 import { GenericForm } from "@/features/modules/generic-form"
 import { ModuleExtras } from "@/features/modules/module-extras"
+import { getHostPath, isHostRenderedNavigation, useElogIntegrationContext } from "@/lib/elog/integration-context"
 import { modules } from "@/lib/elog/mock-data"
 import { useModuleRecords } from "@/lib/elog/mock-service"
 import type { ModuleKey, ViewMode } from "@/lib/elog/types"
@@ -20,6 +21,8 @@ import type { ModuleKey, ViewMode } from "@/lib/elog/types"
 export function ModulePage({ moduleKey }: { moduleKey: ModuleKey }) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const integrationContext = useElogIntegrationContext()
+  const hostRenderedNavigation = isHostRenderedNavigation(integrationContext)
   const routeConfig = modules[moduleKey]
   const config = routeConfig ?? modules.bookings
   const query = searchParams.get("q") ?? ""
@@ -38,7 +41,8 @@ export function ModulePage({ moduleKey }: { moduleKey: ModuleKey }) {
     if (nextView !== "list") params.set("view", nextView)
     if (id) params.set("id", id)
     if (permissionDenied) params.set("permission", "denied")
-    router.replace(`${config.route}${params.toString() ? `?${params.toString()}` : ""}`)
+    const route = hostRenderedNavigation ? getHostPath(config.route) : config.route
+    router.replace(`${route}${params.toString() ? `?${params.toString()}` : ""}`)
   }
 
   if (view === "create" || view === "edit") {
