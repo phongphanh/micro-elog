@@ -37,6 +37,7 @@ import type { DataRecord, ModuleKey, ViewMode } from "@/lib/elog/types"
 import { cn } from "@/lib/utils"
 
 type QiankunMountProps = ShellIntegrationContext & {
+  assetBaseUrl?: string
   container?: Element | DocumentFragment
 }
 
@@ -48,6 +49,7 @@ declare global {
     mount?: (props?: QiankunMountProps) => Promise<void>
     unmount?: (props?: QiankunMountProps) => Promise<void>
     elogApp?: {
+      __runtime?: "react"
       bootstrap: (props?: QiankunMountProps) => Promise<void>
       mount: (props?: QiankunMountProps) => Promise<void>
       unmount: (props?: QiankunMountProps) => Promise<void>
@@ -348,7 +350,7 @@ export async function unmount(props: QiankunMountProps = {}) {
   console.info("[eLog] unmounted")
 }
 
-const lifeCycles = { bootstrap, mount, unmount }
+const lifeCycles = { __runtime: "react" as const, bootstrap, mount, unmount }
 
 Object.assign(window, lifeCycles)
 window.elogApp = lifeCycles

@@ -54,9 +54,22 @@ Shell registry entry:
 }
 ```
 
-Use the dedicated Qiankun entry, not the Next homepage HTML. `out/qiankun-entry.html` is generated during `pnpm build` so Qiankun/import-html-entry only evaluates the real mini-app lifecycle bundle instead of the standalone Next/Turbopack document runtime. Cloudflare serves the clean `/qiankun-entry` URL through `_redirects`.
+Use the dedicated Qiankun entry, not the Next homepage HTML. `out/qiankun-entry` is generated during `pnpm build` as an extensionless HTML file so Cloudflare can serve `/qiankun-entry` directly without redirecting through a clean-URL canonicalization loop.
 
-Lifecycle globals are exposed by `out/qiankun-lifecycle.js`:
+For Qiankun object-entry fallback, use:
+
+```ts
+entry: {
+  html: '<div id="elog-qiankun-entry"></div>',
+  scripts: ['https://micro-elog.pages.dev/qiankun-lifecycle.js'],
+  styles: ['https://micro-elog.pages.dev/qiankun.css']
+},
+assetBaseUrl: 'https://micro-elog.pages.dev'
+```
+
+The stable stylesheet URL avoids coupling Shell to a hashed Next CSS chunk.
+
+Lifecycle globals are exposed by `out/qiankun-lifecycle.js`. This file is a Qiankun-safe loader with no React external globals; it loads `qiankun-react-vendor.js` and `qiankun-app.js` from the eLog asset origin before delegating to the real React lifecycles.
 
 ```ts
 bootstrap(props)

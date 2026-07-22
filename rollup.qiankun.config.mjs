@@ -65,13 +65,13 @@ const qiankunConfig = [
     external: ["react", "react-dom/client", "react/jsx-runtime"],
     onwarn,
     output: {
-      file: "out/qiankun-lifecycle.js",
+      file: "out/qiankun-app.js",
       format: "iife",
-      name: "elogQiankunLifecycle",
+      name: "elogQiankunApp",
       globals: {
-        react: "React",
-        "react-dom/client": "ReactDOMClient",
-        "react/jsx-runtime": "ReactJSXRuntime",
+        react: "globalThis.React",
+        "react-dom/client": "globalThis.ReactDOMClient",
+        "react/jsx-runtime": "globalThis.ReactJSXRuntime",
       },
       sourcemap: false,
     },
